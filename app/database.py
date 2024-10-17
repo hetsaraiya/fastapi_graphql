@@ -1,19 +1,58 @@
+# from sqlalchemy import create_engine
+# from sqlalchemy.ext.declarative import declarative_base
+# from sqlalchemy.orm import sessionmaker
+# from sqlalchemy.ext.asyncio import (
+#     AsyncEngine as SQLAlchemyAsyEng,
+#     create_async_engine as create_sql_alq,
+#     AsyncSession as SQLalAsySess,
+#     async_sessionmaker
+# )
+
+# SQLALCHAMY_DATABASE_URL = 'sqlite:///data.db'
+
+# engine = create_engine(SQLALCHAMY_DATABASE_URL, connect_args={
+#                        "check_same_thread": False})
+
+# async_engine = create_sql_alq(
+#     url="sqlite:///data.db",
+
+# )
+
+# SessionLocal = async_sessionmaker(bind=async_engine, autocommit=False, autoflush=False,)
+
+# Base = declarative_base()
+
+# async def get_db():   
+#     db = SessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
+
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    create_async_engine,
+    AsyncSession,
+    async_sessionmaker,
+)
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 
-SQLALCHAMY_DATABASE_URL = 'sqlite:///data.db'
+# Use a URI that specifies the use of the aiqlite driver
+SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///data.db'
 
-engine = create_engine(SQLALCHAMY_DATABASE_URL, connect_args={
-                       "check_same_thread": False})
+# Create an async engine
+async_engine = create_async_engine(
+    SQLALCHEMY_DATABASE_URL,
+    echo=True,  # Optional: Set to True to see SQL queries being executed
+)
 
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False,)
+# Create a sessionmaker for async sessions
+SessionLocal = async_sessionmaker(bind=async_engine, autocommit=False, autoflush=False)
 
 Base = declarative_base()
 
-def get_db():
-    db = SessionLocal()
-    try:
+# Dependency to get DB session
+async def get_db():
+    async with SessionLocal() as db:
         yield db
-    finally:
-        db.close()
