@@ -29,7 +29,7 @@ class ShowUser(BaseModel):
     phone: int
 
     class config():
-        orm_mode = True
+        from_attributes = True
 
 class ShowAccount(BaseModel):
     
@@ -37,7 +37,7 @@ class ShowAccount(BaseModel):
     bank: Bank
 
     class config():
-        orm_mode = True
+        from_attributes = True
 
 class UserCreate(BaseModel):
     name: str  
@@ -48,7 +48,7 @@ class UserCreate(BaseModel):
     address: str 
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 import strawberry

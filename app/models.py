@@ -1,6 +1,11 @@
-from sqlalchemy import Column, String, Integer, ForeignKey, Double, DateTime, Boolean
+from sqlalchemy import Column, String, Integer, ForeignKey, Float, DateTime, Boolean, Enum as Sql
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from enum import Enum
+
+class UserType(Enum):
+    CUSTOMER = "CUSTOMER"
+    ADMIN = "ADMIN"
 
 Base = declarative_base()
 
@@ -14,10 +19,10 @@ class User(Base):
     email = Column(String)
     password = Column(String)
     address = Column(String)
-    is_admin=Column(Boolean)
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
     is_deleted = Column(Boolean)
+    user_type = Column(Sql(UserType))
 
     accounts = relationship("Account", back_populates="user")
 
@@ -26,7 +31,7 @@ class Bank(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
-    interest_rates = Column(Double)
+    interest_rates = Column(Float)
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
     is_deleted = Column(Boolean)

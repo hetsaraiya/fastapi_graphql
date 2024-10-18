@@ -22,6 +22,7 @@ def authorize(authorization: str) -> User | str:
         user_profile_url = payload.get("profile_url")
         user_email = payload.get("email")
         user_address = payload.get("address")
+        user_type = payload.get("user_type")
 
         return User(
             id=user_id,
@@ -29,7 +30,8 @@ def authorize(authorization: str) -> User | str:
             phone=user_phone,
             profile_url=user_profile_url,
             email=user_email,
-            address=user_address
+            address=user_address,
+            user_type=user_type
         )
 
     except JWTError as e:
@@ -43,8 +45,13 @@ def authorize(authorization: str) -> User | str:
 
 from strawberry.fastapi import BaseContext
 from functools import cached_property
+from sqlalchemy.ext.asyncio import AsyncSession
 
 class Context(BaseContext):
+    def __init__(self, db: AsyncSession, request):
+        self.db = db
+        self.request = request
+
     @cached_property
     def user(self) -> User | None:
         if not self.request:

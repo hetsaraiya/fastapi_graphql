@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sqlalchemy
+aiosqlite
+python-jose
+pydantic[email]
+passlib
+cryptography==3.4.8
+bcrypt==3.2.2
+alembic

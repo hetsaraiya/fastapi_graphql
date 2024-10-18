@@ -29,30 +29,22 @@
 #     finally:
 #         db.close()
 
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    create_async_engine,
-    AsyncSession,
-    async_sessionmaker,
-)
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-
+from typing import AsyncGenerator
 # Use a URI that specifies the use of the aiqlite driver
 SQLALCHEMY_DATABASE_URL = 'sqlite+aiosqlite:///data.db'
 
-# Create an async engine
 async_engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL,
-    echo=True,  # Optional: Set to True to see SQL queries being executed
+    echo=True,
 )
 
-# Create a sessionmaker for async sessions
 SessionLocal = async_sessionmaker(bind=async_engine, autocommit=False, autoflush=False)
 
 Base = declarative_base()
 
-# Dependency to get DB session
-async def get_db():
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with SessionLocal() as db:
         yield db

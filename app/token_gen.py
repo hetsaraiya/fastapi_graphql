@@ -17,7 +17,9 @@ def create_access_token(user: User):
         "profile_url" : user.profile_url,
         "email" : user.email,
         "address" : user.address,
+        "user_type" : str(user.user_type.value),
     }
+    print(to_encode)
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

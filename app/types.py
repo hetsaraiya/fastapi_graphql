@@ -12,6 +12,7 @@ class User:
     profile_url: Optional[str] = None
     email: Optional[str] = None
     address: Optional[str] = None
+    user_type: Optional[str] = None
     
 
 
@@ -75,6 +76,7 @@ class UpdateUser:
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     is_deleted: Optional[bool] = None
+    user_type: Optional[str] = None
 
 @strawberry.type
 class AccBank:
