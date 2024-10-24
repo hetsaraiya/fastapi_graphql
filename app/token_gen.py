@@ -10,6 +10,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30000000
 
 
 def create_access_token(user: User):
+    print(user.user_type)
     to_encode = {
         "id" : user.id,
         "name" : user.name,

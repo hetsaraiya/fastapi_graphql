@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Account</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            width: 90%;
+            max-width: 1200px;
+        }
+        .form-container {
+            flex: 1;
+            margin-right: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        label {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input {
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .response-container {
+            flex: 1;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Update Account</h1>
+            <form id="updateAccountForm">
+                <label for="id">Account ID:</label>
+                <input type="number" id="id" name="id" required>
+
+                <label for="accType">Account Type:</label>
+                <input type="text" id="accType" name="accType">
+
+                <label for="amount">Amount:</label>
+                <input type="number" id="amount" name="amount">
+
+                <label for="isDeleted">Is Deleted:</label>
+                <input type="checkbox" id="isDeleted" name="isDeleted">
+
+                <label for="updatedAt">Updated At:</label>
+                <input type="text" id="updatedAt" name="updatedAt">
+
+                <button type="submit">Update Account</button>
+            </form>
+        </div>
+        <div class="response-container">
+            <pre id="responseOutput"></pre>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('updateAccountForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const fields = {
+                id: document.getElementById('id').value,
+                accType: document.getElementById('accType').value,
+                amount: document.getElementById('amount').value,
+                isDeleted: document.getElementById('isDeleted').checked,
+                updatedAt: document.getElementById('updatedAt').value
+            };
+
+            let accFields = '';
+            for (const [key, value] of Object.entries(fields)) {
+                if (value !== '' && value !== false) {
+                    if (key === 'id' || key === 'amount') {
+                        accFields += `${key}: ${value},\n                  `;
+                    } else if (key === 'isDeleted') {
+                        accFields += `${key}: ${value},\n                  `;
+                    } else if (key === 'accType') {
+                        accFields += `${key}: ${value},\n                  `; // Enum value without quotes
+                    } else {
+                        accFields += `${key}: "${value}",\n                  `;
+                    }
+                }
+            }
+
+            const mutation = `
+            mutation {
+              updateAccount(
+                acc: {
+                  ${accFields}
+                }
+              ) {
+                accType
+                amount
+                createdAt
+                bankId
+                id
+                isDeleted
+                updatedAt
+                userId
+              }
+            }`;
+
+            const responseOutput = document.getElementById('responseOutput');
+            try {
+                const response = await fetch('/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + document.cookie.split('; ').find(row => row.startsWith('access_token=')).split('=')[1]
+                    },
+                    body: JSON.stringify({ query: mutation })
+                });
+                const result = await response.json();
+                responseOutput.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                responseOutput.textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

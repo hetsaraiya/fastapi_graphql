@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+            overflow-x: auto;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fetch User Details</h1>
+    <form id="fetchUserForm">
+        <div class="checkbox-group">
+            <label><input type="checkbox" name="fields" value="id" checked> ID</label>
+            <label><input type="checkbox" name="fields" value="name" checked> Name</label>
+            <label><input type="checkbox" name="fields" value="phone" checked> Phone</label>
+            <label><input type="checkbox" name="fields" value="profileUrl" checked> Profile URL</label>
+            <label><input type="checkbox" name="fields" value="email" checked> Email</label>
+            <label><input type="checkbox" name="fields" value="address" checked> Address</label>
+        </div>
+        <button type="submit">Fetch User</button>
+    </form>
+    <pre id="responseOutput"></pre>
+
+    <script>
+        document.getElementById('fetchUserForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const selectedFields = Array.from(document.querySelectorAll('input[name="fields"]:checked'))
+                .map(checkbox => checkbox.value)
+                .join('\n                ');
+
+            const query = `
+            query {
+              allUsers {
+                ${selectedFields}
+              }
+            }`;
+
+            const responseOutput = document.getElementById('responseOutput');
+            try {
+                const response = await fetch('/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + document.cookie.split('; ').find(row => row.startsWith('access_token=')).split('=')[1]
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+                const result = await response.json();
+                responseOutput.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                responseOutput.textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

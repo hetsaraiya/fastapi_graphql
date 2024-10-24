@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create User</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #007acc;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007acc;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #005f99;
+        }
+
+        pre {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>Create User</h1>
+    <form id="createUserForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="phone">Phone:</label>
+        <input type="number" id="phone" name="phone" required><br><br>
+
+        <label for="profile_url">Profile URL:</label>
+        <input type="url" id="profile_url" name="profile_url"><br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address"><br><br>
+
+        <label for="user_type">User Type</label>
+        <input type="text" name="user_type" id="user_type">
+
+        <button type="submit">Create User</button>
+    </form>
+    <h2>Response</h2>
+    <pre id="responseOutput"></pre>
+
+    <script>
+        document.getElementById('createUserForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const phone = parseInt(document.getElementById('phone').value);
+            const profile_url = document.getElementById('profile_url').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const address = document.getElementById('address').value;
+            const user_type = document.getElementById('user_type').value;
+
+            const mutation = `
+            mutation {
+              createUser(userinp: {
+                name: "${name}",
+                phone: ${phone},
+                profileUrl: "${profile_url}",
+                email: "${email}",
+                password: "${password}",
+                address: "${address}",
+                userType: "${user_type}"
+              }) {
+                id
+                name
+                phone
+                profileUrl
+                email
+                address
+              }
+            }`;
+
+            const responseOutput = document.getElementById('responseOutput');
+
+            try {
+                const response = await fetch('/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + document.cookie.split('; ').find(row => row.startsWith('access_token=')).split('=')[1]
+                    },
+                    body: JSON.stringify({ query: mutation })
+                });
+                const result = await response.json();
+                responseOutput.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                responseOutput.textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -31,13 +31,14 @@ class BankInput:
 
 @strawberry.input
 class UserInput:
-    id: Optional[int]
+    id: Optional[int] = None
     name: Optional[str]
     phone: Optional[int]
     profile_url: Optional[str]
     email: Optional[str]
     password: Optional[str] = None
     address: Optional[str] = None
+    user_type: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     is_deleted: Optional[bool] = None

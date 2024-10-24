@@ -13,7 +13,7 @@ from fastapi.security import OAuth2PasswordBearer
 from .auth import Context
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login/")
 from .decorators import require_authentication
-
+from strawberry.exceptions import GraphQLError
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -27,9 +27,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 class Query:
 
     @strawberry.field
-    @require_authentication
     def qqq(info: strawberry.Info[Context]) -> str:
-        print(info.context.user.email)
+        # print(info.context.user.email)
         return "New"
 
     @strawberry.field
@@ -54,28 +53,6 @@ class Query:
                 )
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
-
-    @strawberry.mutation
-    async def bank(self, bank: BankInput, info: strawberry.Info[Context]) -> Bank:
-        async for db in get_db():
-            try:
-                reg_bank = models.Bank(
-                    id=bank.id,
-                    name=bank.name,
-                    interest_rates=bank.interest_rates
-                )
-                
-                db.add(reg_bank)
-                await db.commit()
-                await db.refresh(reg_bank)
-
-                return Bank(
-                    id=reg_bank.id,
-                    name=reg_bank.name,
-                    interest_rates=reg_bank.interest_rates
-                )
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
 
     @strawberry.field
     @require_authentication
@@ -115,7 +92,7 @@ class Query:
                     ) for user in users
                 ]
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise GraphQLError(str(e))
 
 @strawberry.type
 class Mutation:
@@ -142,32 +119,33 @@ class Mutation:
                         interest_rates=reg_bank.interest_rates
                     )
             except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
+                raise GraphQLError( detail=str(e))
         else:
-            raise HTTPException(status_code=401, detail="Unauthorized")
+            raise GraphQLError("Unauthorized")
 
     @strawberry.mutation
-    @require_authentication
-    async def user(self, user: UserInput, info: strawberry.Info[Context]) -> User:
-        if info.context.user.user_type == "ADMIN":
+    async def create_user(self, userinp: UserInput, info: strawberry.Info[Context]) -> User:
+        if True:
             try:
                 async for db in get_db():
                     result = await db.execute(
-                        select(models.User).filter((models.User.email == user.email) | (models.User.phone == user.phone))
+                        select(models.User).filter((models.User.email == userinp.email) | (models.User.phone == userinp.phone))
                     )
                     exist = result.scalars().first()
 
-                    if exist is not None:
-                        raise Exception("User with email or phone already exists")
-                    hashed_pass = Hash.bcrypt(user.password)
+                    if exist is not None and exist.is_deleted == False:
+                        raise GraphQLError("User with email or phone already exists")
+                    
+                    hashed_pass = Hash.bcrypt(userinp.password)
                     add_user = models.User(
-                        name=user.name,
-                        phone=user.phone,
-                        profile_url=user.profile_url,
-                        email=user.email,
+                        name=userinp.name,
+                        phone=userinp.phone,
+                        profile_url=userinp.profile_url,
+                        email=userinp.email,
                         password=hashed_pass,
-                        address=user.address,
+                        address=userinp.address,
                         created_at=datetime.now(),
+                        user_type=userinp.user_type
                     )
 
                     db.add(add_user)
@@ -181,10 +159,12 @@ class Mutation:
                         email=add_user.email,
                         address=add_user.address
                     )
+            except HTTPException as e:
+                raise e
             except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
+                raise GraphQLError(str(e))
         else:
-            raise HTTPException(status_code=401, detail="Unauthorized")
+            raise GraphQLError("Unauthorized")
 
     @strawberry.mutation
     @require_authentication
@@ -212,9 +192,10 @@ class Mutation:
                         acc_type=open_acc.acc_type,
                     )
             except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
+                raise GraphQLError(str(e))
         else:
-            raise HTTPException(status_code=401, detail="Unauthorized")
+            raise GraphQLError("Unauthorized")
+        
     @strawberry.mutation
     @require_authentication
     async def update_account(self, acc: UpdateAccountInput, info: strawberry.Info[Context]) -> Account:
@@ -252,9 +233,9 @@ class Mutation:
                         acc_type=account.acc_type,
                     )
             except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
+                raise GraphQLError(str(e))
         else:
-            raise HTTPException(status_code=401, detail="Unauthorized")
+            raise GraphQLError("Unauthorized")
 
     @strawberry.mutation
     @require_authentication
@@ -276,9 +257,9 @@ class Mutation:
                         interest_rates=bank.interest_rates,
                     )
             except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
+                raise GraphQLError( detail=str(e))
         else:
-            raise HTTPException(status_code=401, detail="Unauthorized")
+            raise GraphQLError("Unauthorized")
 
     @strawberry.mutation
     @require_authentication
@@ -296,9 +277,9 @@ class Mutation:
                     await db.refresh(user)
                     return "Deleted"
             except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
+                raise GraphQLError(str(e))
         else:
-            raise HTTPException(status_code=401, detail="Unauthorized")
+            raise GraphQLError("Unauthorized")
     @strawberry.mutation
     async def update_user(self, user: UpdateUser, info: strawberry.Info[Context]) -> User:
         print(info.context.user)
@@ -334,8 +315,8 @@ class Mutation:
                         else:
                             raise HTTPException(status_code=404, detail="User not found")
             except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
+                raise GraphQLError(str(e))
         else:
-            raise HTTPException(status_code=401, detail="Unauthorized")
+            raise GraphQLError("Unauthorized")
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)

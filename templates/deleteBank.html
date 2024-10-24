@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphQL Mutation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: #007acc;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007acc;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #005f99;
+        }
+
+        pre {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>GraphQL Mutation</h1>
+    <form id="mutationForm">
+        <label for="id">Bank ID:</label>
+        <input type="number" id="id" name="id" required><br><br>
+        <button type="submit">Submit Mutation</button>
+    </form>
+    <h2>Response</h2>
+    <pre id="responseOutput"></pre>
+
+    <script>
+        document.getElementById('mutationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const id = parseInt(document.getElementById('id').value);
+
+            const mutation = `
+            mutation {
+              deleteBank(bank: ${id}) {
+                id
+                interestRates
+                name
+              }
+            }`;
+
+            const responseOutput = document.getElementById('responseOutput');
+
+            try {
+                const response = await fetch('/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + document.cookie.split('; ').find(row => row.startsWith('access_token=')).split('=')[1]
+                    },
+                    body: JSON.stringify({ query: mutation })
+                });
+                const result = await response.json();
+                responseOutput.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                responseOutput.textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

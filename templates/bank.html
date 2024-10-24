@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphQL Mutation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: #007acc;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007acc;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #005f99;
+        }
+
+        pre {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>GraphQL Mutation</h1>
+    <form id="mutationForm">
+        <label for="id">Account ID:</label>
+        <input type="number" id="id" name="id" required><br><br>
+
+        <label for="accType">Account Type:</label>
+        <input type="text" id="accType" name="accType"><br><br>
+
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount"><br><br>
+
+        <label for="isDeleted">Is Deleted:</label>
+        <input type="checkbox" id="isDeleted" name="isDeleted"><br><br>
+
+        <label for="updatedAt">Updated At:</label>
+        <input type="text" id="updatedAt" name="updatedAt"><br><br>
+
+        <h2>Return Parameters</h2>
+        <label><input type="checkbox" name="returnParams" value="id"> ID</label><br>
+        <label><input type="checkbox" name="returnParams" value="accType"> Account Type</label><br>
+        <label><input type="checkbox" name="returnParams" value="amount"> Amount</label><br>
+        <label><input type="checkbox" name="returnParams" value="createdAt"> Created At</label><br>
+        <label><input type="checkbox" name="returnParams" value="bankId"> Bank ID</label><br>
+        <label><input type="checkbox" name="returnParams" value="isDeleted"> Is Deleted</label><br>
+        <label><input type="checkbox" name="returnParams" value="updatedAt"> Updated At</label><br>
+        <label><input type="checkbox" name="returnParams" value="userId"> User ID</label><br><br>
+
+        <button type="submit">Submit Mutation</button>
+    </form>
+    <h2>Response</h2>
+    <pre id="responseOutput"></pre>
+
+    <script>
+        document.getElementById('mutationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const id = document.getElementById('id').value;
+            const accType = document.getElementById('accType').value;
+            const amount = document.getElementById('amount').value;
+            const isDeleted = document.getElementById('isDeleted').checked;
+            const updatedAt = document.getElementById('updatedAt').value;
+            const returnParams = Array.from(document.querySelectorAll('input[name="returnParams"]:checked'))
+                                      .map(checkbox => checkbox.value)
+                                      .join('\n    ');
+
+            let accountParams = [];
+            if (id) accountParams.push(`id: ${id}`);
+            if (accType) accountParams.push(`accType: ${accType}`);
+            if (amount) accountParams.push(`amount: ${amount}`);
+            if (isDeleted) accountParams.push(`isDeleted: ${isDeleted}`);
+            if (updatedAt) accountParams.push(`updatedAt: "${updatedAt}"`);
+
+            const mutation = `
+            mutation {
+              updateAccount(acc: {${accountParams.join(', ')}}) {
+                ${returnParams}
+              }
+            }`;
+
+            const responseOutput = document.getElementById('responseOutput');
+
+            try {
+                const response = await fetch('/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + document.cookie.split('; ').find(row => row.startsWith('access_token=')).split('=')[1]
+                    },
+                    body: JSON.stringify({ query: mutation })
+                });
+                const result = await response.json();
+                responseOutput.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                responseOutput.textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
