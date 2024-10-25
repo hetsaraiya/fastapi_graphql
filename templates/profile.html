@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile</title>
+  </head>
+  <style>
+    h1,
+    h2 {
+      text-align-last: center;
+      color: #007acc;
+    }
+    h3 {
+      text-align-last: center;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007acc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .button {
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+  <body>
+    <h1>Hello <span id="username"></span></h1>
+    <div>
+      <h3>Email : <span id="email"></span></h3>
+      <h3>Profie Url : <span id="profile"></span></h3>
+      <h3>Phone Number : <span id="phone"></span></h3>
+    </div>
+    <div class="button">
+      <button id="edit">
+        <h3 class="edit">Edit</h3>
+      </button>
+      <span style="width: 40px"></span>
+      <button id="logout">
+        <h3>Logout</h3>
+      </button>
+    </div>
+    <div>
+        <h1>Account Details</h1>
+        <div>
+            <h3>Account ID: <span id="accountId"></span></h3>
+            <h3>AccType: <span id="accType"></span></h3>
+            <h3>Amount: <span id="amount"></span></h3>
+            <h3>Bank ID: <span id="bankId"></span></h3>
+            <h3>Bank Interest Rates: <span id="bankInterestRates"></span></h3>
+            <h3>Bank Name: <span id="bankName"></span></h3>
+            <h3>User Address: <span id="userAddress"></span></h3>
+            <h3>User Email: <span id="userEmail"></span></h3>
+            <h3>User ID: <span id="userId"></span></h3>
+            <h3>User Name: <span id="userName"></span></h3>
+            <h3>User Phone: <span id="userPhone"></span></h3>
+            <h3>User Profile URL: <span id="userProfileUrl"></span></h3>
+        </div>
+        <div class="button">
+        <button id="editacc">
+            <h3 class="edit">Edit</h3>
+        </button>
+        </div>
+    </div>
+    <script>
+      document.getElementById("logout").addEventListener("click", () => {
+        document.cookie.split(";").forEach((c) => {
+          document.cookie =
+            c.trim().split("=")[0] +
+            "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
+        });
+        window.location.href = "/login";
+      });
+      document.getElementById("edit").addEventListener("click", editProfile);
+      function editProfile() {
+        window.location.href = "/api/?api=updateAccount&queryType=mutation";
+      }
+      async function getUserdetails() {
+        const query = `query {
+              user {
+                address
+                email
+                id
+                name
+                phone
+                profileUrl
+                userType
+              }
+            }`;
+
+        const username = document.getElementById("username");
+        const email = document.getElementById("email");
+        const profile = document.getElementById("profile");
+        const phone = document.getElementById("phone");
+        try {
+          const response = await fetch("/graphql", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization:
+                "Bearer " +
+                document.cookie
+                  .split("; ")
+                  .find((row) => row.startsWith("access_token="))
+                  .split("=")[1],
+            },
+            body: JSON.stringify({ query: query }),
+          });
+          const result = await response.json();
+          console.log(result);
+          username.textContent = result.data.user.name;
+          email.textContent = result.data.user.email;
+          profile.textContent = result.data.user.profileUrl;
+          phone.textContent = result.data.user.phone;
+        } catch (error) {
+          responseOutput.textContent = "Error: " + error.message;
+        }
+      }
+
+      async function getAccountData(params) {
+        const query = `query {
+              account {
+                id
+                accType
+                amount
+                user {
+                  id
+                  name
+                  email
+                  phone
+                  profileUrl
+                  address
+                }
+                bank {
+                  id
+                  name
+                  interestRates
+                }
+              }
+            }`;
+
+        
+        try {
+          const response = await fetch("/graphql", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization:
+            "Bearer " +
+            document.cookie
+              .split("; ")
+              .find((row) => row.startsWith("access_token="))
+              .split("=")[1],
+            },
+            body: JSON.stringify({ query: query }),
+          });
+          const result = await response.json();
+          console.log(result);
+          document.getElementById("accType").textContent = result.data.account[0].accType;
+          document.getElementById("amount").textContent = result.data.account[0].amount;
+          document.getElementById("bankId").textContent = result.data.account[0].bank.id;
+          document.getElementById("bankInterestRates").textContent = result.data.account[0].bank.interestRates;
+          document.getElementById("bankName").textContent = result.data.account[0].bank.name;
+          document.getElementById("accountId").textContent = result.data.account[0].id;
+          document.getElementById("userAddress").textContent = result.data.account[0].user.address;
+          document.getElementById("userEmail").textContent = result.data.account[0].user.email;
+          document.getElementById("userId").textContent = result.data.account[0].user.id;
+          document.getElementById("userName").textContent = result.data.account[0].user.name;
+          document.getElementById("userPhone").textContent = result.data.account[0].user.phone;
+          document.getElementById("userProfileUrl").textContent = result.data.account[0].user.profileUrl;
+        } catch (error) {
+          console.error("Error: " + error.message);
+        }
+      }
+      document.getElementById('editacc').addEventListener('click', () => {
+        window.location.href = '/api/?api=updateAccount&queryType=mutation';
+      });
+      getAccountData();
+      getUserdetails();
+    </script>
+  </body>
+</html>

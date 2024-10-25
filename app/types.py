@@ -26,8 +26,8 @@ class Bank:
 @strawberry.input
 class BankInput:
     id:Optional[int] = None
-    name:str
-    interest_rates: float
+    name: Optional[str] = None
+    interest_rates: Optional[float] = None
 
 @strawberry.input
 class UserInput:

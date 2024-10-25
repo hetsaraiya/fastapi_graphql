@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Money</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: #007acc;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        input[type="text"],
+        input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            margin: 0; 
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007acc;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        Withdraw Money
+    </h1>
+    <form id="depositForm">
+        <h3>Id: <input type="number" id="id" placeholder="Enter amount"></h3>
+        <h3>Amount: <input type="number" id="amount" name="amount" placeholder="Enter amount" required></h3>
+        <button type="submit" id="submit">Deposit</button>
+    </form>
+    <script>
+        document.getElementById('submit').addEventListener('click', async (event) => {
+            event.preventDefault();
+            console.log('Deposit button clicked');
+            const id = document.getElementById('id').value;
+            const amount = document.getElementById('amount').value;
+    
+            if (!id || !amount) {
+                alert('Please fill in both fields.');
+                return;
+            }
+    
+            try {
+                const response = await fetch('/withdraw/form', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ "id": parseInt(id), "amount": parseInt(amount) })
+                });
+    
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+    
+                const result = await response.json();
+                console.log(result);
+                alert('Withdraw successful!');
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+                alert('Withdraw failed. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

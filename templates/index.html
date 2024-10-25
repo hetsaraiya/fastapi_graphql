@@ -11,7 +11,12 @@
             padding: 0;
             box-sizing: border-box;
         }
-
+        img {
+          border-radius: 100%;
+          align-self: flex-end;
+          width: 6%;
+          height: 5%;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f9f9f9;
@@ -72,9 +77,12 @@
             margin-top: 40px;
             color: #777;
         }
+        
     </style>
 </head>
 <body>
+  
+    <img id="image" src="https://hetsaraiya.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fvdslmuzn%2Fproduction%2F331aed1c2b2246ec54a64d04c15a162d7bd3bfe9-1087x1450.jpg&w=640&q=100" alt="Image">
     <h1>API List</h1>
     <ul class="api-list" id="api-list">
         <!-- API list will be populated here -->
@@ -156,7 +164,9 @@
                 apiList.appendChild(li);
             });
         }
-
+        document.getElementById("image").addEventListener("click", function(){
+          window.location.href = "/profile";
+        });
         fetchAPIs().then(displayAPIs);
     </script>
 </body>

@@ -58,6 +58,7 @@ class Query:
     @require_authentication
     async def account(self, info: strawberry.Info[Context]) -> list[AccOutput]:
         try:
+            print("entered the account func")
             async for db in get_db():
                 result = await db.execute(select(models.Account))
                 all_acc = result.scalars().all()
@@ -119,7 +120,7 @@ class Mutation:
                         interest_rates=reg_bank.interest_rates
                     )
             except Exception as e:
-                raise GraphQLError( detail=str(e))
+                raise GraphQLError( str(e))
         else:
             raise GraphQLError("Unauthorized")
 

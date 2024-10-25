@@ -91,14 +91,8 @@
         <label for="bankId">Bank ID:</label>
         <input type="number" id="bankId" name="bankId">
 
-        <label for="createdAt">Created At:</label>
-        <input type="text" id="createdAt" name="createdAt">
-
         <label for="isDeleted">Is Deleted:</label>
         <input type="checkbox" id="isDeleted" name="isDeleted">
-
-        <label for="updatedAt">Updated At:</label>
-        <input type="text" id="updatedAt" name="updatedAt">
 
         <button type="submit">Create Account</button>
     </form>
@@ -111,6 +105,25 @@
         document.getElementById('createAccountForm').addEventListener('submit', async function(event) {
             event.preventDefault();
 
+            if (!document.cookie.split('; ').find(row => row.startsWith('access_token='))) {
+                alert('You must be logged in to create an account.');
+                return;
+            }
+            const fieldss = ['userId', 'amount', 'accType', 'bankId',];
+            let isValid = true;
+
+            fieldss.forEach(field => {
+            const input = document.getElementById(field);
+            if (!input.value) {
+                input.classList.add('error'); 
+                input.style.border = '2px solid red'; 
+                isValid = false;
+            } else {
+                input.classList.remove('error'); 
+                input.style.border = ''; 
+            }
+        });
+        if (isValid) {
             const fields = {
                 userId: document.getElementById('userId').value,
                 amount: document.getElementById('amount').value,
@@ -125,9 +138,9 @@
             for (const [key, value] of Object.entries(fields)) {
                 if (value !== '' && value !== false) {
                     if (typeof value === 'string') {
-                        accFields += `${key}: "${value}",\n                  `;
+                        accFields += `${key}: "${value}",\n`;
                     } else {
-                        accFields += `${key}: ${value},\n                  `;
+                        accFields += `${key}: ${value},\n`;
                     }
                 }
             }
@@ -165,6 +178,8 @@
             } catch (error) {
                 responseOutput.textContent = 'Error: ' + error.message;
             }
+        }
+            
         });
     </script>
 </body>

@@ -81,3 +81,52 @@ def login(request: Request, name: str = None, params: str = None):
 @router.get("/api/")
 def apis(request: Request, api :str = None):
     return templates.TemplateResponse(f"{api}.html", {"request": request})
+
+@router.get("/profile")
+def profile(request: Request):
+    return templates.TemplateResponse("profile.html", {"request": request})
+
+@router.get("/home")
+def home(request: Request):
+    return templates.TemplateResponse("home.html", {"request": request})
+
+@router.get("/deposit")
+def deposit(request: Request):
+    return templates.TemplateResponse("deposit.html", {"request": request})
+
+from pydantic import BaseModel
+class DepositRequest(BaseModel):
+    id: int
+    amount: int
+
+@router.post("/deposit/form")
+async def deposit_form(request: Request, deposit: DepositRequest, db: Session = Depends(database.get_db)):
+    id = deposit.id
+    amount = deposit.amount
+    print("id", id)
+    print("amount", amount)
+    query = sqlalchemy.select(models.Account).where(models.Account.id == id)
+    result = await db.execute(query)
+    account = result.scalars().first()
+    account.amount += amount
+    await db.commit()
+    await db.refresh(account)
+    return "done"
+
+@router.get("/withdraw")
+def withdraw(request: Request):
+    return templates.TemplateResponse("withdraw.html", {"request": request})
+
+@router.post("/withdraw/form")
+async def withdraw_form(request: Request, deposit: DepositRequest, db: Session = Depends(database.get_db)):
+    id = deposit.id
+    amount = deposit.amount
+    print("id", id)
+    print("amount", amount)
+    query = sqlalchemy.select(models.Account).where(models.Account.id == id)
+    result = await db.execute(query)
+    account = result.scalars().first()
+    account.amount -= amount
+    await db.commit()
+    await db.refresh(account)
+    return "done"
