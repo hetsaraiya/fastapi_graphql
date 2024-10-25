@@ -6,95 +6,96 @@
     <title>Update Account</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            display: flex;
-            justify-content: space-between;
-            width: 90%;
-            max-width: 1200px;
-        }
-        .form-container {
-            flex: 1;
-            margin-right: 20px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        form {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: center;
+            padding: 20px;
         }
+
+        h1 {
+            color: #007acc;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
         label {
-            margin-bottom: 10px;
-            font-weight: bold;
+            display: block;
+            margin-top: 10px;
         }
-        input {
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="url"] {
+            width: calc(100% - 22px);
             padding: 10px;
-            margin-bottom: 10px;
-            font-size: 16px;
-            width: 300px;
-            border: 1px solid #ccc;
+            margin-top: 5px;
+            border: 1px solid #ddd;
             border-radius: 5px;
         }
+
         button {
+            margin-top: 20px;
             padding: 10px 20px;
-            font-size: 16px;
-            background-color: #007BFF;
-            color: white;
+            background-color: #007acc;
+            color: #fff;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
+
         button:hover {
-            background-color: #0056b3;
+            background-color: #005f99;
         }
-        .response-container {
-            flex: 1;
+
+        pre {
             background-color: #fff;
             padding: 20px;
+            border: 1px solid #ddd;
             border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            overflow-x: auto;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="form-container">
-            <h1>Update Account</h1>
-            <form id="updateAccountForm">
-                <label for="id">Account ID:</label>
-                <input type="number" id="id" name="id" required>
+    <h1>Update Account</h1>
+    <form id="updateAccountForm">
+        <label for="id">Account ID:</label>
+        <input type="number" id="id" name="id" required>
 
-                <label for="accType">Account Type:</label>
-                <input type="text" id="accType" name="accType">
+        <label for="accType">Account Type:</label>
+        <input type="text" id="accType" name="accType">
 
-                <label for="amount">Amount:</label>
-                <input type="number" id="amount" name="amount">
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount">
 
-                <label for="isDeleted">Is Deleted:</label>
-                <input type="checkbox" id="isDeleted" name="isDeleted">
+        <label for="isDeleted">Is Deleted:</label>
+        <input type="checkbox" id="isDeleted" name="isDeleted">
 
-                <label for="updatedAt">Updated At:</label>
-                <input type="text" id="updatedAt" name="updatedAt">
+        <label for="updatedAt">Updated At:</label>
+        <input type="text" id="updatedAt" name="updatedAt">
 
-                <button type="submit">Update Account</button>
-            </form>
-        </div>
-        <div class="response-container">
-            <pre id="responseOutput"></pre>
-        </div>
-    </div>
+        <button type="submit">Update Account</button>
+    </form>
+    <pre id="responseOutput"></pre>
 
     <script>
         document.getElementById('updateAccountForm').addEventListener('submit', async function(event) {
