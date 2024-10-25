@@ -1,13 +1,13 @@
 from jose import JWTError, jwt
 from fastapi import HTTPException, status
 from .types import User
-
+from strawberry.exceptions import GraphQLError
 
 from .token_gen import SECRET_KEY, ALGORITHM
 
 def authorize(authorization: str) -> User | str:
     if not authorization:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No authorization token provided")
+        raise GraphQLError("No authorization token provided")
 
     try:
         token_type, token = authorization.split()
