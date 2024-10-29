@@ -129,16 +129,14 @@
                 amount: document.getElementById('amount').value,
                 accType: document.getElementById('accType').value,
                 bankId: document.getElementById('bankId').value,
-                createdAt: document.getElementById('createdAt').value,
                 isDeleted: document.getElementById('isDeleted').checked,
-                updatedAt: document.getElementById('updatedAt').value
             };
 
             let accFields = '';
             for (const [key, value] of Object.entries(fields)) {
                 if (value !== '' && value !== false) {
                     if (typeof value === 'string') {
-                        accFields += `${key}: "${value}",\n`;
+                        accFields += `${key}: ${value},\n`;
                     } else {
                         accFields += `${key}: ${value},\n`;
                     }

@@ -4,97 +4,132 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Profile</title>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const token = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("access_token="));
+        if (!token) {
+          window.location.href = "/login";
+        }
+      });
+    </script>
+    <style>
+      /* General styling */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f6f9;
+        margin: 0;
+        padding: 0;
+      }
+
+      h1, h2 {
+        text-align: center;
+        color: #007acc;
+      }
+
+      h3 {
+        color: #333;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .details, .account-details {
+        margin: 20px 0;
+        padding: 10px;
+      }
+
+      .details h3, .account-details h3 {
+        margin: 10px 0;
+        font-weight: normal;
+      }
+
+      /* Button styling */
+      .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #007acc;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #005f99;
+      }
+    </style>
   </head>
-  <style>
-    h1,
-    h2 {
-      text-align-last: center;
-      color: #007acc;
-    }
-    h3 {
-      text-align-last: center;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #007acc;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .button {
-      display: flex;
-      justify-content: center;
-    }
-  </style>
   <body>
-    <h1>Hello <span id="username"></span></h1>
-    <div>
-      <h3>Email : <span id="email"></span></h3>
-      <h3>Profie Url : <span id="profile"></span></h3>
-      <h3>Phone Number : <span id="phone"></span></h3>
+    <div class="container">
+      <h1>Hello, <span id="username"></span></h1>
+      <div class="details">
+        <h3>Email: <span id="email"></span></h3>
+        <h3>Profile URL: <span id="profile"></span></h3>
+        <h3>Phone Number: <span id="phone"></span></h3>
+      </div>
+
+      <div class="button-container">
+        <button id="edit">Edit</button>
+        <button id="logout">Logout</button>
+      </div>
+
+      <h1>Account Details</h1>
+      <div class="account-details">
+        <h3>Account ID: <span id="accountId"></span></h3>
+        <h3>Account Type: <span id="accType"></span></h3>
+        <h3>Amount: <span id="amount"></span></h3>
+        <h3>Bank ID: <span id="bankId"></span></h3>
+        <h3>Bank Interest Rates: <span id="bankInterestRates"></span></h3>
+        <h3>Bank Name: <span id="bankName"></span></h3>
+        <h3>User Address: <span id="userAddress"></span></h3>
+        <h3>User Email: <span id="userEmail"></span></h3>
+        <h3>User ID: <span id="userId"></span></h3>
+        <h3>User Name: <span id="userName"></span></h3>
+        <h3>User Phone: <span id="userPhone"></span></h3>
+        <h3>User Profile URL: <span id="userProfileUrl"></span></h3>
+      </div>
+
+      <div class="button-container">
+        <button id="editacc">Edit Account</button>
+      </div>
     </div>
-    <div class="button">
-      <button id="edit">
-        <h3 class="edit">Edit</h3>
-      </button>
-      <span style="width: 40px"></span>
-      <button id="logout">
-        <h3>Logout</h3>
-      </button>
-    </div>
-    <div>
-        <h1>Account Details</h1>
-        <div>
-            <h3>Account ID: <span id="accountId"></span></h3>
-            <h3>AccType: <span id="accType"></span></h3>
-            <h3>Amount: <span id="amount"></span></h3>
-            <h3>Bank ID: <span id="bankId"></span></h3>
-            <h3>Bank Interest Rates: <span id="bankInterestRates"></span></h3>
-            <h3>Bank Name: <span id="bankName"></span></h3>
-            <h3>User Address: <span id="userAddress"></span></h3>
-            <h3>User Email: <span id="userEmail"></span></h3>
-            <h3>User ID: <span id="userId"></span></h3>
-            <h3>User Name: <span id="userName"></span></h3>
-            <h3>User Phone: <span id="userPhone"></span></h3>
-            <h3>User Profile URL: <span id="userProfileUrl"></span></h3>
-        </div>
-        <div class="button">
-        <button id="editacc">
-            <h3 class="edit">Edit</h3>
-        </button>
-        </div>
-    </div>
+
     <script>
       document.getElementById("logout").addEventListener("click", () => {
         document.cookie.split(";").forEach((c) => {
           document.cookie =
-            c.trim().split("=")[0] +
-            "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
+            c.trim().split("=")[0] + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
         });
         window.location.href = "/login";
       });
+
       document.getElementById("edit").addEventListener("click", editProfile);
       function editProfile() {
         window.location.href = "/api/?api=updateAccount&queryType=mutation";
       }
-      async function getUserdetails() {
-        const query = `query {
-              user {
-                address
-                email
-                id
-                name
-                phone
-                profileUrl
-                userType
-              }
-            }`;
 
+      async function getUserdetails() {
+        const query = `query { user { address email id name phone profileUrl userType } }`;
         const username = document.getElementById("username");
         const email = document.getElementById("email");
         const profile = document.getElementById("profile");
         const phone = document.getElementById("phone");
+
         try {
           const response = await fetch("/graphql", {
             method: "POST",
@@ -110,38 +145,17 @@
             body: JSON.stringify({ query: query }),
           });
           const result = await response.json();
-          console.log(result);
           username.textContent = result.data.user.name;
           email.textContent = result.data.user.email;
           profile.textContent = result.data.user.profileUrl;
           phone.textContent = result.data.user.phone;
         } catch (error) {
-          responseOutput.textContent = "Error: " + error.message;
+          console.error("Error: " + error.message);
         }
       }
 
-      async function getAccountData(params) {
-        const query = `query {
-              account {
-                id
-                accType
-                amount
-                user {
-                  id
-                  name
-                  email
-                  phone
-                  profileUrl
-                  address
-                }
-                bank {
-                  id
-                  name
-                  interestRates
-                }
-              }
-            }`;
-
+      async function getAccountData() {
+        const query = `query { account { id accType amount user { id name email phone profileUrl address } bank { id name interestRates } } }`;
         
         try {
           const response = await fetch("/graphql", {
@@ -149,16 +163,15 @@
             headers: {
               "Content-Type": "application/json",
               Authorization:
-            "Bearer " +
-            document.cookie
-              .split("; ")
-              .find((row) => row.startsWith("access_token="))
-              .split("=")[1],
+                "Bearer " +
+                document.cookie
+                  .split("; ")
+                  .find((row) => row.startsWith("access_token="))
+                  .split("=")[1],
             },
             body: JSON.stringify({ query: query }),
           });
           const result = await response.json();
-          console.log(result);
           document.getElementById("accType").textContent = result.data.account[0].accType;
           document.getElementById("amount").textContent = result.data.account[0].amount;
           document.getElementById("bankId").textContent = result.data.account[0].bank.id;
@@ -175,9 +188,11 @@
           console.error("Error: " + error.message);
         }
       }
-      document.getElementById('editacc').addEventListener('click', () => {
-        window.location.href = '/api/?api=updateAccount&queryType=mutation';
+
+      document.getElementById("editacc").addEventListener("click", () => {
+        window.location.href = "/api/?api=updateAccount&queryType=mutation";
       });
+
       getAccountData();
       getUserdetails();
     </script>

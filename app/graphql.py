@@ -49,7 +49,9 @@ class Query:
                     phone=db_user.phone,
                     profile_url=db_user.profile_url,
                     email=db_user.email,
-                    address=db_user.address
+                    address=db_user.address,
+                    is_deleted=db_user.is_deleted,
+                    user_type=db_user.user_type.value,
                 )
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
@@ -68,10 +70,30 @@ class Query:
                         user=(await db.execute(select(models.User).filter(models.User.id == acc.user_id))).scalars().first(),
                         bank=(await db.execute(select(models.Bank).filter(models.Bank.id == acc.bank_id))).scalars().first(),
                         amount=acc.amount,
-                        acc_type=acc.acc_type
+                        acc_type=acc.acc_type,
+                        is_deleted=acc.is_deleted
                     )
                     for acc in all_acc
                 ]
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+        
+    @strawberry.field
+    @require_authentication
+    async def id_account(self, id: int, info: strawberry.Info[Context]) -> AccOutput:
+        print(id)
+        try:
+            async for db in get_db():
+                result = await db.execute(select(models.Account).filter(models.Account.id == id))
+                acc = result.scalars().first()
+                return AccOutput(
+                    id=acc.id,
+                    user=(await db.execute(select(models.User).filter(models.User.id == acc.user_id))).scalars().first(),
+                    bank=(await db.execute(select(models.Bank).filter(models.Bank.id == acc.bank_id))).scalars().first(),
+                    amount=acc.amount,
+                    acc_type=acc.acc_type,
+                    is_deleted=acc.is_deleted
+                )
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
@@ -90,10 +112,50 @@ class Query:
                         profile_url=user.profile_url,
                         email=user.email,
                         address=user.address,
+                        user_type=user.user_type.value,
+                        is_deleted=user.is_deleted
                     ) for user in users
                 ]
         except Exception as e:
             raise GraphQLError(str(e))
+        
+    @strawberry.field
+    @require_authentication
+    async def all_banks(self, info: strawberry.Info[Context]) -> list[Bank]:
+        try:
+            async for db in get_db():
+                result = await db.execute(select(models.Bank))
+                banks = result.scalars().all()
+                return [
+                    Bank(
+                        id=bank.id,
+                        name=bank.name,
+                        interest_rates=bank.interest_rates,
+                        is_deleted=bank.is_deleted
+                    ) for bank in banks
+                ]
+        except Exception as e:
+            raise GraphQLError(str(e))
+        
+    @strawberry.field
+    @require_authentication
+    async def id_bank(self, id: int, info: strawberry.Info[Context]) -> Bank:
+        print(id)
+        try:
+            async for db in get_db():
+                result = await db.execute(select(models.Bank).filter(models.Bank.id == id))
+                bank = result.scalars().first()
+                return Bank(
+                    id=bank.id,
+                    name=bank.name,
+                    interest_rates=bank.interest_rates,
+                    is_deleted=bank.is_deleted
+                )
+        except Exception as e:
+            raise GraphQLError(str(e))
+
+
+
 
 @strawberry.type
 class Mutation:
@@ -237,6 +299,37 @@ class Mutation:
                 raise GraphQLError(str(e))
         else:
             raise GraphQLError("Unauthorized")
+        
+    @strawberry.mutation
+    @require_authentication
+    async def update_bank(self, bank: BankInput, info: strawberry.Info[Context]) -> Bank:
+        if info.context.user.user_type == "ADMIN":
+            try:
+                async for db in get_db():
+                    result = await db.execute(
+                        select(models.Bank).filter(models.Bank.id == bank.id)
+                    )
+                    bank_found = result.scalars().first()
+
+                    if bank_found:
+                        bank_found.name = bank.name if bank.name is not None else bank_found.name
+                        bank_found.interest_rates = bank.interest_rates if bank.interest_rates is not None else bank_found.interest_rates
+                        bank_found.updated_at = datetime.now()
+                        await db.commit()
+                        await db.refresh(bank_found)
+
+                        return Bank(
+                            id=bank_found.id,
+                            name=bank_found.name,
+                            interest_rates=bank_found.interest_rates,
+                        )
+                    else:
+                        raise HTTPException(status_code=404, detail="Bank not found")
+            except Exception as e:
+                raise GraphQLError(str(e))
+        else:
+            raise GraphQLError("Unauthorized")
+    
 
     @strawberry.mutation
     @require_authentication
@@ -315,6 +408,66 @@ class Mutation:
                             )
                         else:
                             raise HTTPException(status_code=404, detail="User not found")
+            except Exception as e:
+                raise GraphQLError(str(e))
+        else:
+            raise GraphQLError("Unauthorized")
+        
+    @strawberry.mutation
+    @require_authentication
+    async def recover_user(self, id: int, info: strawberry.Info[Context]) -> str:
+        if info.context.user.user_type == "ADMIN":
+            try:
+                async for db in get_db():
+                    result = await db.execute(
+                        select(models.User).filter(models.User.id == id)
+                    )
+                    user = result.scalars().first()
+                    user.is_deleted = False
+                    user.updated_at = datetime.now()
+                    await db.commit()
+                    await db.refresh(user)
+                    return "Recovered"
+            except Exception as e:
+                raise GraphQLError(str(e))
+        else:
+            raise GraphQLError("Unauthorized")
+        
+    @strawberry.mutation
+    @require_authentication
+    async def recover_account(self, id: int, info: strawberry.Info[Context]) -> str:
+        if info.context.user.user_type == "ADMIN":
+            try:
+                async for db in get_db():
+                    result = await db.execute(
+                        select(models.Account).filter(models.Account.id == id)
+                    )
+                    account = result.scalars().first()
+                    account.is_deleted = False
+                    account.updated_at = datetime.now()
+                    await db.commit()
+                    await db.refresh(account)
+                    return "Recovered"
+            except Exception as e:
+                raise GraphQLError(str(e))
+        else:
+            raise GraphQLError("Unauthorized")
+        
+    @strawberry.mutation
+    @require_authentication
+    async def recover_bank(self, id: int, info: strawberry.Info[Context]) -> str:
+        if info.context.user.user_type == "ADMIN":
+            try:
+                async for db in get_db():
+                    result = await db.execute(
+                        select(models.Bank).filter(models.Bank.id == id)
+                    )
+                    bank = result.scalars().first()
+                    bank.is_deleted = False
+                    bank.updated_at = datetime.now()
+                    await db.commit()
+                    await db.refresh(bank)
+                    return "Recovered"
             except Exception as e:
                 raise GraphQLError(str(e))
         else:

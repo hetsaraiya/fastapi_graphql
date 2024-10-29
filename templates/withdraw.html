@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Withdraw Money</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const token = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("access_token="));
+          if (!token) {
+            window.location.href = "/login";
+          }
+        });
+      </script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -62,7 +72,7 @@
     <form id="depositForm">
         <h3>Id: <input type="number" id="id" placeholder="Enter amount"></h3>
         <h3>Amount: <input type="number" id="amount" name="amount" placeholder="Enter amount" required></h3>
-        <button type="submit" id="submit">Deposit</button>
+        <button type="submit" id="submit">Withdraw</button>
     </form>
     <script>
         document.getElementById('submit').addEventListener('click', async (event) => {

@@ -13,7 +13,8 @@ class User:
     email: Optional[str] = None
     address: Optional[str] = None
     user_type: Optional[str] = None
-    
+    is_deleted: Optional[bool] = None
+    user_type: Optional[str] = None
 
 
 @strawberry.type
@@ -21,6 +22,7 @@ class Bank:
     id: Optional[int] = None
     name: Optional[str] = None
     interest_rates: Optional[float] = None
+    is_deleted: Optional[bool] = None
     
 
 @strawberry.input
@@ -100,6 +102,7 @@ class AccOutput:
     user: Optional[AccUser] = None
     bank: Optional[AccBank] = None
     amount: Optional[int] = None
+    is_deleted: Optional[bool] = None
     acc_type: Optional[str] = None
     
 

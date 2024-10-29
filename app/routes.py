@@ -6,7 +6,9 @@ from .hashing import Hash
 from .schema import ShowUser, UserCreate
 import sqlalchemy
 from fastapi.templating import Jinja2Templates
+from fastapi import Request
 router = APIRouter(tags=["Auth"])
+from .token_gen import get_current_user
 
 @router.post("/login/form")
 async def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
@@ -27,12 +29,10 @@ async def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = De
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = token.create_access_token(user=user)
-    return {"access_token": access_token, "token_type": "bearer"}
+    print({"access_token": access_token, "token_type": "bearer", "user_type": user.user_type.value})
+    return {"access_token": access_token, "token_type": "bearer", "user_type": user.user_type.value}
 
 
-from app.hashing import Hash
-from fastapi import Request
-from .decorators import require_authentication
 templates = Jinja2Templates(directory="templates")
 
 @router.get("/",)
@@ -130,3 +130,12 @@ async def withdraw_form(request: Request, deposit: DepositRequest, db: Session =
     await db.commit()
     await db.refresh(account)
     return "done"
+
+@router.get("/admin")
+def admin(request: Request):
+    return templates.TemplateResponse("admin.html", {"request": request})
+
+
+@router.get("/admin2")
+def admin(request: Request):
+    return templates.TemplateResponse("admin2.html", {"request": request})
